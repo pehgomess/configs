@@ -1,0 +1,401 @@
+call plug#begin('~/.vim/plugged')
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+call plug#end()
+
+" Fish doesn't play all that well with others
+set shell=/bin/bash
+let mapleader = "\<Space>"
+set nocompatible
+
+" from http://sheerun.net/2014/03/21/how-to-boost-your-vim-productivity/
+if executable('ag')
+	set grepprg=ag\ --nogroup\ --nocolor
+endif
+if executable('rg')
+	set grepprg=rg\ --no-heading\ --vimgrep
+	set grepformat=%f:%l:%c:%m
+endif
+
+filetype plugin indent on
+set autoindent
+set timeoutlen=300 " http://stackoverflow.com/questions/2158516/delay-before-o-opens-a-new-line
+set encoding=utf-8
+set scrolloff=2
+set noshowmode
+set hidden
+set nowrap
+set nojoinspaces
+set termguicolors
+
+" Permanent undo
+set undodir=~/.vimdid
+set undofile
+
+" Use wide tabs
+set shiftwidth=8
+set softtabstop=8
+set tabstop=8
+set noexpandtab
+
+" Get syntax
+syntax on
+
+" Wrapping options
+set formatoptions=tc " wrap text and comments using textwidth
+set formatoptions+=r " continue comments when pressing ENTER in I mode
+set formatoptions+=q " enable formatting of comments with gq
+set formatoptions+=n " detect lists for formatting
+set formatoptions+=b " auto-wrap in insert mode, and do not wrap old long lines
+
+" Proper search
+set incsearch
+set ignorecase
+set smartcase
+set gdefault
+
+" Search results centered please
+nnoremap <silent> n nzz
+nnoremap <silent> N Nzz
+nnoremap <silent> * *zz
+nnoremap <silent> # #zz
+nnoremap <silent> g* g*zz
+
+set vb t_vb= " No more beeps
+set backspace=2 " Backspace over newlines
+set nofoldenable
+set ttyfast
+" https://github.com/vim/vim/issues/1735#issuecomment-383353563
+set lazyredraw
+set synmaxcol=500
+set relativenumber " Relative line numbers
+set number " Also show current absolute line
+set diffopt+=iwhite " No whitespace in vimdiff
+" Make diffing better: https://vimways.org/2018/the-power-of-diff/
+" set colorcolumn=80 " and give me a colored column
+
+" Colors
+set background=dark
+colors desert
+"colors slate
+hi Normal guibg=NONE
+highlight nonText guibg=NONE
+
+" Show those damn hidden characters
+" Verbose: set listchars=nbsp:¬,eol:¶,extends:»,precedes:«,trail:•
+set listchars=nbsp:¬,extends:»,precedes:«,trail:•
+
+" ; as :
+nnoremap ; :
+
+" Ctrl+j as Esc
+" Ctrl-j is a little awkward unfortunately:
+" https://github.com/neovim/neovim/issues/5916
+" So we also map Ctrl+k
+inoremap <C-j> <Esc>
+
+nnoremap <C-k> <Esc>
+inoremap <C-k> <Esc>
+vnoremap <C-k> <Esc>
+snoremap <C-k> <Esc>
+xnoremap <C-k> <Esc>
+cnoremap <C-k> <Esc>
+onoremap <C-k> <Esc>
+lnoremap <C-k> <Esc>
+tnoremap <C-k> <Esc>
+
+" Open new file adjacent to current file
+nnoremap <leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
+
+" <leader><leader> toggles between buffers
+nnoremap <leader><leader> <c-^>
+
+" Jump to last edit position on opening file
+" https://stackoverflow.com/questions/31449496/vim-ignore-specifc-file-in-autocommand
+au BufReadPost * if expand('%:p') !~# '\m/\.git/' && line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif 
+
+" {{{ Indent Settings
+"----------------------------------------------
+" Language: apiblueprint
+"----------------------------------------------
+au FileType apiblueprint set expandtab
+au FileType apiblueprint set shiftwidth=4
+au FileType apiblueprint set softtabstop=4
+au FileType apiblueprint set tabstop=4
+
+"----------------------------------------------
+" Language: Bash
+"----------------------------------------------
+au FileType sh set noexpandtab
+au FileType sh set shiftwidth=2
+au FileType sh set softtabstop=2
+au FileType sh set tabstop=2
+
+"----------------------------------------------
+" Language: C++
+"----------------------------------------------
+au FileType cpp set expandtab
+au FileType cpp set shiftwidth=4
+au FileType cpp set softtabstop=4
+au FileType cpp set tabstop=4
+
+
+inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+" Use `[g` and `]g` to navigate diagnostics
+" Use `:CocDiagnostics` to get all diagnostics of current buffer in location list.
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+
+" GoTo code navigation.
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+" Use K to show documentation in preview window.
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  elseif (coc#rpc#ready())
+    call CocActionAsync('doHover')
+  else
+    execute '!' . &keywordprg . " " . expand('<cword>')
+  endif
+endfunction
+
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Symbol renaming.
+nmap <leader>rn <Plug>(coc-rename)
+
+" Formatting selected code.
+xmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+
+augroup mygroup
+  autocmd!
+  " Setup formatexpr specified filetype(s).
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder.
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Applying codeAction to the selected region.
+" Example: `<leader>aap` for current paragraph
+xmap <leader>a  <Plug>(coc-codeaction-selected)
+nmap <leader>a  <Plug>(coc-codeaction-selected)
+
+" Remap keys for applying codeAction to the current buffer.
+nmap <leader>ac  <Plug>(coc-codeaction)
+" Apply AutoFix to problem on the current line.
+nmap <leader>qf  <Plug>(coc-fix-current)
+
+" Map function and class text objects
+" NOTE: Requires 'textDocument.documentSymbol' support from the language server.
+xmap if <Plug>(coc-funcobj-i)
+omap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap af <Plug>(coc-funcobj-a)
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
+
+" Remap <C-f> and <C-b> for scroll float windows/popups.
+if has('nvim-0.4.0') || has('patch-8.2.0750')
+  nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+  inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+  inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+  vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
+  vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+endif
+
+" Use CTRL-S for selections ranges.
+" Requires 'textDocument/selectionRange' support of language server.
+nmap <silent> <C-s> <Plug>(coc-range-select)
+xmap <silent> <C-s> <Plug>(coc-range-select)
+
+" Add `:Format` command to format current buffer.
+command! -nargs=0 Format :call CocAction('format')
+
+" Add `:Fold` command to fold current buffer.
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" Add `:OR` command for organize imports of the current buffer.
+command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+
+" Add (Neo)Vim's native statusline support.
+" NOTE: Please see `:h coc-status` for integrations with external plugins that
+" provide custom statusline: lightline.vim, vim-airline.
+set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+
+" Mappings for CoCList
+" Show all diagnostics.
+nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions.
+nnoremap <silent><nowait> <space>e  :<C-u>CocList extensions<cr>
+" Show commands.
+nnoremap <silent><nowait> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document.
+nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols.
+nnoremap <silent><nowait> <space>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent><nowait> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent><nowait> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list.
+nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
+
+"----------------------------------------------
+" Language: CSS
+"----------------------------------------------
+au FileType css set expandtab
+au FileType css set shiftwidth=2
+au FileType css set softtabstop=2
+au FileType css set tabstop=2
+
+"----------------------------------------------
+" Language: gitcommit
+"----------------------------------------------
+au FileType gitcommit setlocal spell
+au FileType gitcommit setlocal textwidth=80
+
+"----------------------------------------------
+" Language: fish
+"----------------------------------------------
+au FileType fish set expandtab
+au FileType fish set shiftwidth=2
+au FileType fish set softtabstop=2
+au FileType fish set tabstop=2
+
+"----------------------------------------------
+" Language: gitconfig
+"----------------------------------------------
+au FileType gitconfig set noexpandtab
+au FileType gitconfig set shiftwidth=2
+au FileType gitconfig set softtabstop=2
+au FileType gitconfig set tabstop=2
+
+"----------------------------------------------
+" Language: HTML
+"----------------------------------------------
+au FileType html set expandtab
+au FileType html set shiftwidth=2
+au FileType html set softtabstop=2
+au FileType html set tabstop=2
+
+"----------------------------------------------
+" Language: JavaScript
+"----------------------------------------------
+au FileType javascript set expandtab
+au FileType javascript set shiftwidth=2
+au FileType javascript set softtabstop=2
+au FileType javascript set tabstop=2
+
+"----------------------------------------------
+" Language: JSON
+"----------------------------------------------
+au FileType json set expandtab
+au FileType json set shiftwidth=2
+au FileType json set softtabstop=2
+au FileType json set tabstop=2
+
+"----------------------------------------------
+" Language: Make
+"----------------------------------------------
+au FileType make set noexpandtab
+au FileType make set shiftwidth=2
+au FileType make set softtabstop=2
+au FileType make set tabstop=2
+
+"----------------------------------------------
+" Language: Markdown
+"----------------------------------------------
+au FileType markdown setlocal spell
+au FileType markdown set expandtab
+au FileType markdown set shiftwidth=4
+au FileType markdown set softtabstop=4
+au FileType markdown set tabstop=4
+au FileType markdown set syntax=markdown
+
+"----------------------------------------------
+" Language: PlantUML
+"----------------------------------------------
+au FileType plantuml set expandtab
+au FileType plantuml set shiftwidth=2
+au FileType plantuml set softtabstop=2
+au FileType plantuml set tabstop=2
+
+"----------------------------------------------
+" Language: Protobuf
+"----------------------------------------------
+au FileType proto set expandtab
+au FileType proto set shiftwidth=2
+au FileType proto set softtabstop=2
+au FileType proto set tabstop=2
+
+"----------------------------------------------
+" Language: Python
+"----------------------------------------------
+au FileType python set expandtab
+au FileType python set shiftwidth=4
+au FileType python set softtabstop=4
+au FileType python set tabstop=4
+
+"----------------------------------------------
+" Language: Ruby
+"----------------------------------------------
+au FileType ruby set expandtab
+au FileType ruby set shiftwidth=2
+au FileType ruby set softtabstop=2
+au FileType ruby set tabstop=2
+
+" Enable neomake for linting.
+"au FileType ruby autocmd BufWritePost * Neomake
+
+"----------------------------------------------
+" Language: SQL
+"----------------------------------------------
+au FileType sql set expandtab
+au FileType sql set shiftwidth=2
+au FileType sql set softtabstop=2
+au FileType sql set tabstop=2
+
+"----------------------------------------------
+" Language: TypeScript
+"----------------------------------------------
+au FileType typescript set expandtab
+au FileType typescript set shiftwidth=4
+au FileType typescript set softtabstop=4
+au FileType typescript set tabstop=4
+
+"----------------------------------------------
+" Language: vimscript
+"----------------------------------------------
+au FileType vim set expandtab
+au FileType vim set shiftwidth=4
+au FileType vim set softtabstop=4
+au FileType vim set tabstop=4
+
+"----------------------------------------------
+" Language: YAML
+"----------------------------------------------
+au FileType yaml set expandtab
+au FileType yaml set shiftwidth=2
+au FileType yaml set softtabstop=2
+au FileType yaml set tabstop=2
+
+"----------------------------------------------
+" Language: Golang
+"----------------------------------------------
+au FileType go set noexpandtab
+au FileType go set shiftwidth=4
+au FileType go set softtabstop=4
+au FileType go set tabstop=4
+" }}}
