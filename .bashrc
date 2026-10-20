@@ -1,16 +1,5 @@
-# If not running interactively, don't do anything
-[[ $- != *i* ]] && return
-
-# Be nice to sysadmins
-if [ -f /etc/bashrc ]; then
-  source /etc/bashrc
-elif [ -f /etc/bash.bashrc ]; then
-  source /etc/bash.bashrc
+# Exemplo mínimo. O instalador preserva o .bashrc existente e acrescenta o source.
+[[ $- == *i* ]] || return
+if [[ -f ${XDG_CONFIG_HOME:-$HOME/.config}/bash/terminal.bash ]]; then
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/bash/terminal.bash"
 fi
-
-# History management
-export HISTCONTROL=ignoreboth
-export HISTSIZE=5000
-export HISTIGNORE="clear:bg:fg:cd:cd -:cd ..:exit:date:w:* --help:ls:l:ll:lll"
-
-fish

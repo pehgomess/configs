@@ -1,4 +1,4 @@
-" Fish doesn't play all that well with others
+" Use Bash for editor shell commands
 set shell=/bin/bash
 let mapleader = "\<Space>"
 set nocompatible
@@ -24,7 +24,9 @@ set nojoinspaces
 set termguicolors
 
 " Permanent undo
-set undodir=~/.vimdid
+let s:undo_dir = stdpath('state') . '/undo'
+call mkdir(s:undo_dir, 'p')
+let &undodir = s:undo_dir
 set undofile
 
 " Use wide tabs
