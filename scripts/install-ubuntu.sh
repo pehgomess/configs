@@ -4,21 +4,22 @@ set -euo pipefail
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 config_dir=${XDG_CONFIG_HOME:-$HOME/.config}
 data_dir=${XDG_DATA_HOME:-$HOME/.local/share}
-install_packages=false
+install_packages=true
 case "${1:-}" in
   --packages) install_packages=true ;;
+  --no-packages) install_packages=false ;;
   '') ;;
-  *) printf 'Uso: %s [--packages]\n' "$0" >&2; exit 2 ;;
+  *) printf 'Uso: %s [--packages|--no-packages]\n' "$0" >&2; exit 2 ;;
 esac
 if (( EUID == 0 )); then
-  echo 'Execute como seu usuário, sem sudo. --packages usa sudo apenas para o apt.' >&2
+  echo 'Execute como seu usuário, sem sudo. O instalador usa sudo apenas para o apt.' >&2
   exit 1
 fi
 if "$install_packages"; then
   sudo apt update
-  sudo apt install bash bash-completion git python3 neovim tmux fortune-mod xclip wl-clipboard ripgrep
+  sudo apt install bash bash-completion git python3 neovim tmux fortune-mod xclip wl-clipboard ripgrep curl xz-utils
 fi
-for tool in bash git python3 nvim tmux; do
+for tool in bash git python3 nvim tmux curl tar xz; do
   if ! command -v "$tool" >/dev/null; then
     printf 'Dependência ausente: %s. Execute novamente com --packages.\n' "$tool" >&2
     exit 1
@@ -88,4 +89,5 @@ fi
 rm -f -- "$data_dir/fortunes/frasesfortune.dat"
 "$strfile_cmd" "$data_dir/fortunes/frasesfortune" "$data_dir/fortunes/frasesfortune.dat"
 printf '%s\n' "$data_dir/fortunes/frasesfortune.dat" >> "$backup_dir/installed-files.txt"
+bash "$repo_dir/scripts/install-blesh.sh"
 printf 'Instalado. Backup: %s\nAbra um novo terminal Bash.\nSeu .bashrc foi preservado com um bloco adicional; shell padrão inalterado.\n' "$backup_dir"

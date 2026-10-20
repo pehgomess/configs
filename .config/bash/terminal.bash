@@ -17,6 +17,7 @@ export LESS_TERMCAP_ue=$'\e[0m'
 export LESS_TERMCAP_us=$'\e[04;36m'
 
 alias e='nvim'
+alias vim='nvim'
 alias m='make'
 alias g='git'
 alias gc='git checkout'

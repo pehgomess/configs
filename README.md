@@ -9,7 +9,7 @@ Inclui atalhos, tmux com tema Gruvbox e Neovim. Fish não é necessário.
 
 ```bash
 cd /home/pedro/Documents/repo/configs
-bash scripts/install-ubuntu.sh --packages
+bash scripts/install-ubuntu.sh
 ```
 
 Abra um novo terminal Bash ou carregue a personalização na sessão atual:
@@ -18,9 +18,12 @@ Abra um novo terminal Bash ou carregue a personalização na sessão atual:
 source "${XDG_CONFIG_HOME:-$HOME/.config}/bash/terminal.bash"
 ```
 
-`--packages` usa sudo para instalar bash, bash-completion, git, python3,
-neovim, tmux, fortune-mod, xclip, wl-clipboard e ripgrep. Sem essa opção,
-o instalador exige que os programas essenciais já estejam disponíveis.
+O instalador usa sudo para instalar bash, bash-completion, git, python3,
+neovim, tmux, fortune-mod, xclip, wl-clipboard, ripgrep, curl e xz-utils.
+Também baixa e instala o ble.sh automaticamente e configura o alias `vim='nvim'`.
+Use `--no-packages` para pular o apt quando as dependências já estiverem
+instaladas; o ble.sh e as configurações continuam sendo instalados.
+`--packages` continua aceito e tem o mesmo efeito da execução sem opções.
 Não altera seu shell de login. Se você o mudou para Fish anteriormente,
 use `chsh -s /bin/bash` e entre novamente na sessão.
 
@@ -49,7 +52,8 @@ configs no seu `.bashrc`.
   Copie com `y` no modo de cópia ou `Ctrl+y` para enviar o buffer ao clipboard.
   Usa wl-copy no Wayland e xclip no X11. Em sessões remotas sem servidor
   gráfico, o clipboard do desktop não estará disponível.
-- **Neovim:** inicie com `nvim` ou `e`. Tema desert, números relativos,
+- **Neovim:** inicie com `nvim`, `vim` ou `e`. O alias `vim` abre o Neovim.
+  Tema desert, números relativos,
   undo persistente e comandos externos via Bash. A configuração padrão não
   tem dependências de plugins. `init.vim-cpp` é uma variante legada com CoC,
   não aplicada: exige vim-plug, Node.js, CoC e servidores de linguagem.
@@ -68,6 +72,9 @@ não trocam o emulador de terminal. As configurações antigas de Fish ficam
 no repositório como referência, sem serem instaladas.
 
 ## Sugestões automáticas e conclusão com ble.sh
+
+O ble.sh já faz parte da instalação completa acima. Para instalar ou atualizar
+somente esse complemento:
 
 ```bash
 bash scripts/install-blesh.sh
